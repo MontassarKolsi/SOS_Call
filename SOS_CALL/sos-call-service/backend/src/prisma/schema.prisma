@@ -1,0 +1,89 @@
+datasource db {
+  provider = "postgresql"
+}
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+enum MerchantStatus {
+  ACTIVE
+  PAUSED
+}
+
+enum DonationStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+enum CampaignStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AdminRole {
+  ADMIN
+}
+
+model Merchant {
+  id        String         @id @default(cuid())
+  name      String
+  slug      String         @unique
+  website   String?
+  email     String?
+  status    MerchantStatus @default(ACTIVE)
+
+  donations Donation[]
+
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model Campaign {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  status      CampaignStatus @default(ACTIVE)
+  startsAt    DateTime?
+  endsAt      DateTime?
+
+  donations   Donation[]
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Donation {
+  id              String         @id @default(cuid())
+  merchantId      String
+  campaignId      String?
+
+  orderAmount     Int
+  donationAmount  Int
+  currency        String         @default("TND")
+  status          DonationStatus @default(PENDING)
+
+  paymentReference String?       @unique
+  confirmedAt     DateTime?
+
+  merchant        Merchant       @relation(fields: [merchantId], references: [id])
+  campaign        Campaign?      @relation(fields: [campaignId], references: [id])
+
+  createdAt       DateTime       @default(now())
+
+  @@index([merchantId])
+  @@index([campaignId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Admin {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         AdminRole @default(ADMIN)
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}

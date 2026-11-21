@@ -1,0 +1,17 @@
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: sos-call-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sos_admin
+      POSTGRES_PASSWORD: sos_password
+      POSTGRES_DB: sos_call
+    ports:
+      - "5433:5432"
+    volumes:
+      - sos_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  sos_postgres_data:
